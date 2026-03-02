@@ -1,0 +1,196 @@
+name: Public Issues → Private Sync (with filter)
+
+on:
+  issues:
+    types: [opened, edited]
+    # Only required types to ensure contributor authority
+
+permissions:
+  issues: write
+
+jobs:
+  filter:
+    runs-on: ubuntu-latest
+    outputs:
+      should_sync: ${{ steps.decide.outputs.should_sync }}
+      reason: ${{ steps.decide.outputs.reason }}
+      type_labels: ${{ steps.decide.outputs.type_labels }}
+    steps:
+      - name: Decide whether issue is valid (label check)
+        id: decide
+        uses: actions/github-script@v7
+        env:
+          TYPE_LABELS: ${{ vars.SYNC_TYPE_LABELS }}
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const action = context.payload.action;
+
+            // Parse allowed type labels from a multiline repo variable.
+            const allowedTypeLabels = (process.env.TYPE_LABELS || "")
+              .split(/\r?\n/)
+              .map(s => s.trim())
+              .filter(Boolean);
+
+            // Read labels from issue and normalize to strings
+            const issueLabels = [];
+
+            for (const label of issue.labels || []) {
+              if (typeof label === "string") {
+                issueLabels.push(label);
+              } else if (label && typeof label === "object" && label.name) {
+                issueLabels.push(label.name);
+              }
+            }
+
+            // Keep only labels that are allowed type labels
+            const matchedTypeLabels = [];
+
+            for (const label of issueLabels) {
+              if (allowedTypeLabels.includes(label)) {
+                matchedTypeLabels.push(label);
+              }
+            }
+
+            // Enforce only when issue opened:
+            if (action === "opened" && matchedTypeLabels.length === 0) {
+              core.setOutput("should_sync", "false");
+              core.setOutput(
+                "reason",
+                `opened without allowed template labels (allowed=${allowedTypeLabels.join(", ")})`
+              );
+              core.setOutput("type_labels", "");
+              return;
+            }
+
+            // For edited/reopened: allow sync, but only sync allowed type labels
+            core.setOutput("should_sync", "true");
+            core.setOutput("reason", "ok");
+            core.setOutput("type_labels", matchedTypeLabels.join(","));
+
+      - name: Close issue if not valid
+        if: steps.decide.outputs.should_sync != 'true' && github.event.action == 'opened'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Label for maintainers (label needs to exist in repos)
+            try {
+              await github.rest.issues.addLabels({
+                owner, repo, 
+                issue_number: issue.number,
+                labels: ["invalid-template"]
+              });
+            } catch (e) {}
+
+            await github.rest.issues.createComment({
+              owner, repo, 
+              issue_number: issue.number,
+              body:
+                "This repository requires using one of the provided issue templates.\n\n" +
+                "Please click **New issue** and choose the correct template.\n" +
+                "Closing this issue."
+            });
+
+            // Close
+            await github.rest.issues.update({
+              owner, repo, 
+              issue_number: issue.number,
+              state: "closed"
+            });
+
+  sync_to_private:
+    needs: filter
+    if: needs.filter.outputs.should_sync == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create/update private mirror issue
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_TO_PRIVATE_TOKEN }}
+          PRIVATE_REPO: ${{ vars.PRIVATE_REPO }}
+          TEAM: ${{ vars.EDITORS_TEAM }}
+          TYPE_LABELS: ${{ needs.filter.outputs.type_labels }}
+        run: |
+          set -euo pipefail
+
+          PUB_REPO="${GITHUB_REPOSITORY}"
+          ISSUE_NUMBER="${{ github.event.issue.number }}"
+          ISSUE_URL="${{ github.event.issue.html_url }}"
+          ACTION="${{ github.event.action }}"
+          TITLE="${{ github.event.issue.title }}"
+          BODY="${{ github.event.issue.body }}"
+          STATE="${{ github.event.issue.state }}"
+          AUTHOR="${{ github.event.issue.user.login }}"
+
+          # Create hidden marker for syncing back (Unique) 
+          MARKER="<!-- SYNC: public_repo=${PUB_REPO} public_issue=${ISSUE_NUMBER} -->"
+
+          # Find existing private issue by marker
+          EXISTING=$(gh issue list \
+            --repo "$PRIVATE_REPO" \
+            --state all \
+            --search "$MARKER in:body" \
+            --limit 1 \
+            | awk '{print $1}' || true)
+            # --> Without "--state all" it searches only open issues --> Closed Issues can create dublicate
+          cat > /tmp/body.md <<EOF
+          ${MARKER}
+
+          **Source:** ${ISSUE_URL}  
+          **From:** @${AUTHOR}  
+          **State (public):** ${STATE}
+
+          ---
+
+          ${BODY}
+          EOF
+
+          # Create Private Issue if new
+          if [[ -z "${EXISTING}" || "${EXISTING}" == "null" ]]; then
+            NEW_URL=$(gh issue create \
+              --repo "$PRIVATE_REPO" \
+              --title "[PUB #${ISSUE_NUMBER}] ${TITLE}" \
+              --body-file /tmp/body.md)
+
+            # gh prints the URL to stdout, e.g. https://github.com/ORG/REPO/issues/456
+            NEW_NUMBER="${NEW_URL##*/}"
+
+            echo "Created private issue: #$NEW_NUMBER"
+
+            # Apply type labels
+            if [[ -n "${TYPE_LABELS}" ]]; then
+              # Convert comma-separated list 
+              IFS=',' read -r -a arr <<< "${TYPE_LABELS}"
+              for lbl in "${arr[@]}"; do
+                lbl="$(echo "$lbl" | xargs)"
+                [[ -n "$lbl" ]] && gh issue edit "$NEW_NUMBER" --repo "$PRIVATE_REPO" --add-label "$lbl" || true
+              done
+            fi
+
+            # Notify editors: ~assign team~ + ping comment
+            # Can assing user, not team. Comment still works
+            #gh issue edit "$NEW_NUMBER" --repo "$PRIVATE_REPO" --add-assignee "@$TEAM" || true
+            gh issue comment "$NEW_NUMBER" --repo "$PRIVATE_REPO" --body "@$TEAM New synced issue from public: ${ISSUE_URL}" || true
+
+          # Edit if already exists in private
+          else
+            echo "Updating private issue: #$EXISTING"
+            gh issue edit "$EXISTING" --repo "$PRIVATE_REPO" --title "[PUB #${ISSUE_NUMBER}] ${TITLE}" --body-file /tmp/body.md
+            # This ACTION check is to ensure future functionality if other triggers are ever implemented (Currently redundant)
+            if [[ "$ACTION" == "edited" ]]; then
+              gh issue comment "$EXISTING" --repo "$PRIVATE_REPO" --body \
+              "NOTE: User edited the public issue description" || true
+            fi
+
+            # REMOVED: Listening for reopened creates feedback respone on contributor reopening
+            ## Notify editors if reopen by user but dont sync
+            # if [[ "$ACTION" == "reopened" ]]; then
+            #  gh issue comment "$EXISTING" --repo "$PRIVATE_REPO" \
+            #    --body "User reopened the public issue: ${ISSUE_URL}. Review if reconsideration is needed." || true
+            # fi
+          fi

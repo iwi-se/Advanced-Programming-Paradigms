@@ -1,0 +1,40 @@
+name: "Request New Content"
+description: "Use this template to request new topics, examples, etc. you would like to see in the future"
+labels: ["content-request"]
+title: "[Content Request] <Topic you want added>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Request additional topics, code examples, etc. you would like to see in the future.
+        Note: Not everything can be covered in this course. Some things may be part of the APP course or otherwise simply dont fit in the scope of this course.
+
+  - type: checkboxes
+    id: type
+    attributes:
+      label: What area of the course does this request touch?
+      options:
+        - label: The Book
+        - label: The Source Code
+        - label: The GitHub Repository
+        - label: Other
+    validations:
+      required: true
+
+  - type: input
+    id: topic
+    attributes:
+      label: What topic should be covered?
+      description: "Mention the topic or keyword you would like to see added."
+      placeholder: "Example: Polymorphism"
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Why should this be added?
+      description: "Explain why this content would be relevant."
+      placeholder: "This feature is important for demonstrating..."
+    validations:
+      required: true

@@ -1,0 +1,19 @@
+name: Other issue
+description: Use this template to report an Issue that is not covered under the provided templates
+labels: ["other"]
+title: "[Other] <short descriptor for the Issue>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Submit an Issue that is not covered under the other templates.
+        Note: If your Issue is about an Error, a Content Request or is suggesting and improvement, please use the appropriate template instead.
+    
+  - type: input
+    id: description
+    attributes:
+      label: What is the Issue?
+      description: "Explain the Issue."
+      placeholder: "Text"
+    validations:
+      required: true

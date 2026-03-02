@@ -1,0 +1,61 @@
+name: "Report Error"
+description: "Use this template to report errors in the source code, the book or the repository"
+labels: ["bug"]
+title: "[Error] <Short description of the issue>"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please provide as much detail as possible so we can quickly resolve to error
+        Remember: Some source code (PingPongImpossible.cpp, EffectOfConst.cpp) deliberately contains errors. Check the comments
+
+  - type: dropdown
+    id: type
+    attributes:
+      label:  In what does this error occur?
+      options:
+        - The Book
+        - Source Code
+        - The GitHub Repository
+        - Other
+    validations:
+      required: true
+  
+  - type: input
+    id: location
+    attributes:
+      label:  Where does this error occur exactly?
+      description: "Provide the file name, page number or repository section if applicable."
+      placeholder: "Example: sources/RatNumRefSem_3/math_helper.cpp"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the issue
+      description: "Explain what is wrong."
+      placeholder: "The code example does not compile because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: suggestion
+    attributes:
+      label:  Suggest a correction (Optional)
+      description: "If you know how to fix it, suggest your fix here."
+      placeholder: "The code should..."
+    validations:
+      required: false
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label:  How severe is the error?
+      options:
+        - Severe | Blocks learning
+        - Moderate | Confusing
+        - Minor | Costmetic
+    validations:
+      required: true
+
