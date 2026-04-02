@@ -1,10 +1,10 @@
-# Basic Programming Paradigms in C++
-**_This Repository is currently under construction._** 
+# Advanced Programming Paradigms in C++
 
-It will serve as a public access point to download the current release of the book "Basic Programming Paradigms in C++" by [Dr. Ulrich W. Eisenecker](https://www.wifa.uni-leipzig.de/personenprofil/mitarbeiter/prof-dr-ulrich-eisenecker) as well as the accompanying source code examples.
+
+This page serves as a public access point for downloading the latest version of the book *Advanced Programming Paradigms in C++*, as well as the accompanying source code.
 ## Downloading Files
-The latest Release can be downloaded [here](../../releases/latest). Alternatively the source code files can be accessed individually [here](/sources)
+The latest release can be downloaded [here](../../releases/latest). Alternatively the source code files can be accessed individually [here](/sources).
 ## Changelog
-The Changelog can be found [here](CHANGELOG.md) and will chronicle which files have been added, modified and deleted at any given point.
+The change log documents which files were added, modified, or deleted at a specific point in time and can be viewed [here](CHANGELOG.md).
 ## Submitting Issues
-The Repository provides templates for submitting issues such as errors, suggestions for improvements and requests for new content. Further information can be found [here](SUBMISSIONS.md)
+The repository provides templates for submitting issues such as errors, suggestions for improvements and requests for new content. Further information can be found [here](SUBMISSIONS.md).
