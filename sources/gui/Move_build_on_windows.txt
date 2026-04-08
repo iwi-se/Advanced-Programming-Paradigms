@@ -1,0 +1,6 @@
+Change #include in Move.cpp to
+#include <c:/pdcurses/curses.h>
+
+Afterwards compile with
+
+g++ -std=c++20 Move.cpp -o test -I C:\pdcurses/pdcurses  c:/pdcurses/wincon/*.o
