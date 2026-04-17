@@ -107,7 +107,7 @@ jobs:
     if: needs.filter.outputs.should_sync == 'true'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Create/update private mirror issue
         env:
@@ -115,17 +115,17 @@ jobs:
           PRIVATE_REPO: ${{ vars.PRIVATE_REPO }}
           TEAM: ${{ vars.EDITORS_TEAM }}
           TYPE_LABELS: ${{ needs.filter.outputs.type_labels }}
+          EVENT: ${{ github.event_path }}
+          PUB_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_URL: ${{ github.event.issue.html_url }}
+          ACTION: ${{ github.event.action }}
+          TITLE: ${{ github.event.issue.title }}
+          BODY: ${{ github.event.issue.body }}
+          STATE: ${{ github.event.issue.state }}
+          AUTHOR: ${{ github.event.issue.user.login }}
         run: |
           set -euo pipefail
-
-          PUB_REPO="${GITHUB_REPOSITORY}"
-          ISSUE_NUMBER="${{ github.event.issue.number }}"
-          ISSUE_URL="${{ github.event.issue.html_url }}"
-          ACTION="${{ github.event.action }}"
-          TITLE="${{ github.event.issue.title }}"
-          BODY="${{ github.event.issue.body }}"
-          STATE="${{ github.event.issue.state }}"
-          AUTHOR="${{ github.event.issue.user.login }}"
 
           # Create hidden marker for syncing back (Unique) 
           MARKER="<!-- SYNC: public_repo=${PUB_REPO} public_issue=${ISSUE_NUMBER} -->"
@@ -139,15 +139,15 @@ jobs:
             | awk '{print $1}' || true)
             # --> Without "--state all" it searches only open issues --> Closed Issues can create dublicate
           cat > /tmp/body.md <<EOF
-          ${MARKER}
+          $MARKER
 
-          **Source:** ${ISSUE_URL}  
-          **From:** @${AUTHOR}  
-          **State (public):** ${STATE}
+          **Source:** "$ISSUE_URL"
+          **From:** @"$AUTHOR"  
+          **State (public):** "$STATE"
 
           ---
 
-          ${BODY}
+          "$BODY"
           EOF
 
           # Create Private Issue if new
