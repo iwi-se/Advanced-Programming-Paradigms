@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Decide whether issue is valid (label check)
         id: decide
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           TYPE_LABELS: ${{ vars.SYNC_TYPE_LABELS }}
         with:
@@ -70,7 +70,7 @@ jobs:
 
       - name: Close issue if not valid
         if: steps.decide.outputs.should_sync != 'true' && github.event.action == 'opened'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           script: |
             const issue = context.payload.issue;
