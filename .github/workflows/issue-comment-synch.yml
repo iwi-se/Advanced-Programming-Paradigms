@@ -1,0 +1,111 @@
+name: Sync PUBLIC comments to private issue
+
+on:
+  issue_comment:
+    types: [created, edited, deleted]
+permissions:
+  contents: read
+
+jobs:
+  sync-public-comment:
+    if: github.event.comment.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.SYNC_TO_PRIVATE_TOKEN }}
+      PRIVATE_REPO: ${{ vars.PRIVATE_REPO }}
+      PUBLIC_REPO: ${{ github.event.repository.name }}
+      PUBLIC_ISSUE_NUMBER: ${{ github.event.issue.number }}
+      COMMENT_ID: ${{ github.event.comment.id }}
+      COMMENT_URL: ${{ github.event.comment.html_url }}
+      COMMENT_BODY: ${{ github.event.comment.body }}
+      COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
+
+    steps:
+      - name: Find private issue and comment
+        id: find
+        run: |
+          set -euo pipefail
+          MARKER="<!-- SYNC: public_repo=$PUBLIC_REPO public_issue=$PUBLIC_ISSUE_NUMBER -->"
+
+          EXISTING=$(gh api "search/issues?q=$(jq -rn --arg q "$MARKER repo:$PRIVATE_REPO is:issue" '$q | @uri')" \
+            | jq -r '.items[0].number')
+
+          if [ -z "$EXISTING" ] || [ "$EXISTING" = "null" ]; then
+            echo "No private private Issue found"
+            exit 1
+          fi
+
+          echo "Found private Issue: #$EXISTING"
+          echo "issue_number=$EXISTING" >> $GITHUB_OUTPUT
+
+          EXISTING_COMMENT=$(gh api "repos/$PRIVATE_REPO/issues/$EXISTING/comments" \
+            | jq -r ".[] | select(.body | contains(\"comment-id: $COMMENT_ID\")) | .id")
+              
+          echo "Found private Comment: #$EXISTING_COMMENT"
+          echo "comment_id=$EXISTING_COMMENT" >> $GITHUB_OUTPUT
+
+      - name: Create comment
+        if: github.event.action == 'created'
+        env:
+          EXISTING: ${{ steps.find.outputs.issue_number }}
+        run: |
+          set -euo pipefail
+          cat > /tmp/comment.md << EOF
+          <!-- comment-id: $COMMENT_ID -->
+
+          **Source:** $COMMENT_URL
+          **From:** @$COMMENT_AUTHOR  
+
+          ---
+
+          $COMMENT_BODY
+          EOF
+
+          echo "Syncing PUBLIC comment to $PRIVATE_REPO#$EXISTING"
+
+          gh issue comment "$EXISTING" \
+            --repo "$PRIVATE_REPO" \
+            --body-file /tmp/comment.md
+
+      - name: Edit comment
+        if: github.event.action == 'edited'
+        env:
+          EXISTING: ${{ steps.find.outputs.issue_number }}
+          EXISTING_COMMENT: ${{ steps.find.outputs.comment_id }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EXISTING_COMMENT" ] || [ "$EXISTING_COMMENT" = "null" ]; then
+            echo "No comment found for comment-id: $COMMENT_ID"
+            exit 1
+          fi
+
+          cat > /tmp/comment.md << EOF
+          <!-- comment-id: $COMMENT_ID -->
+
+          **Source:** $COMMENT_URL
+          **From:** @$COMMENT_AUTHOR  (edited)
+
+          ---
+
+          $COMMENT_BODY
+          EOF
+
+          echo "Update Comment: $EXISTING_COMMENT"
+
+          gh api --method PATCH "repos/$PRIVATE_REPO/issues/comments/$EXISTING_COMMENT" \
+            --field body=@/tmp/comment.md
+
+      - name: Delete comment
+        if: github.event.action == 'deleted'
+        env:
+          EXISTING_COMMENT: ${{ steps.find.outputs.comment_id }}
+        run: |
+          set -euo pipefail
+          if [ -z "$EXISTING_COMMENT" ] || [ "$EXISTING_COMMENT" = "null" ]; then
+            echo "No comment found for comment-id: $COMMENT_ID"
+            exit 1
+          fi
+
+          echo "Delete Comment: $EXISTING_COMMENT"
+
+          gh api --method DELETE "repos/$PRIVATE_REPO/issues/comments/$EXISTING_COMMENT"
