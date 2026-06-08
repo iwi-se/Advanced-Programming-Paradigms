@@ -141,13 +141,13 @@ jobs:
           cat > /tmp/body.md <<EOF
           $MARKER
 
-          **Source:** "$ISSUE_URL"
-          **From:** @"$AUTHOR"  
-          **State (public):** "$STATE"
+          **Source:** $ISSUE_URL
+          **From:** @$AUTHOR  
+          **State (public):** $STATE
 
           ---
 
-          "$BODY"
+          $BODY
           EOF
 
           # Create Private Issue if new
