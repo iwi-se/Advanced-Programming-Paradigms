@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   sync-public-comment:
-    if: github.event.comment.user.type != 'Bot'
+    if: github.event.comment.user.login != 'programming-book-bot'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ secrets.SYNC_TO_PRIVATE_TOKEN }}
