@@ -1,4 +1,4 @@
-// LateBindingLost.cpp by Ulrich Eisenecker, February 4, 2025
+// LateBindingLost.cpp by Ulrich Eisenecker, May 11, 2026
 
 #include <iostream>
 using namespace std;
@@ -18,7 +18,7 @@ class GrandParent
       }
       virtual ~GrandParent()
       {
-         cout << "GrandParent~GrandParent(): ";
+         cout << "GrandParent::~GrandParent(): ";
          virtualFunction();
       };
       virtual void virtualFunction() const

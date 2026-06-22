@@ -38,7 +38,10 @@ int main()
       auto o1 { make_shared<Object>("Jaden"s) };
       auto o2 { make_shared<Object>("Josh"s) };
       o1->connect(o2);
-      o1->disconnect(); cout << "o1uc " << o1.use_count() << "  o2uc " << o2.use_count() << endl;//o1.reset();
+      o1->disconnect(); 
+      cout << "o1uc " << o1.use_count() 
+           << "  o2uc " << o2.use_count() << endl;
+      o1.reset();
       o2.reset();
    }
 

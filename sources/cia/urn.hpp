@@ -1,4 +1,4 @@
-// urn.hpp by Ulrich Eisenecker, June 1, 2026
+// urn.hpp by Ulrich Eisenecker, March 10, 2023
 
 #ifndef URN_HPP
 #define URN_HPP
@@ -18,7 +18,7 @@ namespace urn
          explicit UrnOR(uint n,uint k,uint check = 1):m_n { n },
                                                       m_k { k },
                                                       m_balls(k,0)
-         {
+         { 
             if (check == 1 && m_n == 0 && m_k > 0)
             {
                std::cerr << "UrnOR with n = 0 and k > 0 is not valid, "
@@ -43,18 +43,18 @@ namespace urn
             return m_balls[index];
          }
          [[nodiscard]] virtual bool next()
-         // Member function improved by Agathe Freywald.
          {
-            uint down { m_k };
-            while (down > 1 && m_balls[down - 1] == m_n - 1)
+            for (uint down { m_k }; down > 0; --down)
             {
-            	m_balls[down - 1] = 0;
-            	--down;
-            }
-            if (down > 0 && m_balls[down - 1] < m_n - 1)
-            {
-            	m_balls[down - 1]++;
-            	return true;
+               if (m_balls[down - 1] < m_n - 1)
+               {
+                  ++m_balls[down - 1];
+                  for (uint up { down }; up < m_k; ++up)
+                  {
+                     m_balls[up] = 0;
+                  }
+                  return true;
+               }
             }
             return false;
          }
@@ -69,7 +69,7 @@ namespace urn
    {
       public:
          explicit UrnO(uint n,uint k,uint check = 2):UrnOR { n,k,check }
-         {
+         { 
             if (check == 2 && m_k > m_n)
             {
                std::cerr << "UrnO with k > n is not valid, "
@@ -113,7 +113,7 @@ namespace urn
    {
       public:
          explicit UrnR(uint n,uint k,uint check = 3):UrnOR { n,k,check }
-         {
+         { 
             if (check == 3 && m_n == 0)
             {
                std::cerr << "UrnR with n = 0 is not valid, "
@@ -145,14 +145,14 @@ namespace urn
             return false;
          }
    };
-
+   
    class Urn: public UrnO, public UrnR
    {
-      public:
+      public: 
          explicit Urn(uint n,uint k):UrnOR { n,k },
                                      UrnO { n,k,1 },
                                      UrnR { n,k,1 }
-         {
+         { 
             for (uint i { 1 }; i < m_k; ++i)
             {
                m_balls[i] = i;

@@ -1,4 +1,4 @@
-// InitializerList.cpp by Ulrich Eisenecker, February 15, 2023
+// InitializerList.cpp by Ulrich Eisenecker, April 22, 2026
 
 #include <iostream>
 #include <initializer_list>
@@ -19,11 +19,7 @@ class Person
          string result { };
          for (const auto& name : m_firstnames)
          {
-            result += name;
-            if (m_firstnames.size() > 0)
-            {
-               result += ' ';
-            }
+            result += name + ' ';
          }
          result += m_surname;
          return result;
@@ -37,6 +33,6 @@ int main()
 {
    Person somePerson { "Johnson",{ "Jaden","Asa","Evan" } };
    cout << somePerson.fullname() << endl;
-   Person anotherPerson { "Miller"};
+   Person anotherPerson { "Miller" };
    cout << anotherPerson.fullname() << endl;
 }

@@ -1,5 +1,37 @@
 # Changelog
 
+## 0.93 — 2026-06-22 09:37:15 UTC
+
+### Book
+- Updated PDF
+
+### Added
+- sources/cia/urn.hpp
+- sources/templates/PickWithMemberTemplate.cpp
+
+### Modified
+- book/Advanced Programming Paradigms in C++.pdf
+- sources/cia/FinalDraw.cpp
+- sources/functional/Cone.cpp
+- sources/objects/Acquaintances.cpp
+- sources/objects/AssignmentUnitTests.cpp
+- sources/objects/Circular.cpp
+- sources/objects/FinalClass.cpp
+- sources/objects/InitializerList.cpp
+- sources/objects/LateBindingLost.cpp
+- sources/objects/Nodiscard.cpp
+- sources/objects/Order.cpp
+- sources/objects/RelationsGraph.cpp
+- sources/objects/SharedPointer.cpp
+- sources/objects/Sorting.cpp
+- sources/objects/TransferOwnership.cpp
+- sources/objects/urn.hpp
+- sources/templates/TypenameTemplate.cpp
+
+### Removed
+- sources/objects/exec
+- sources/templates/SwapMore.cpp
+
 ## v0.92 — 2026-04-08 08:44:32 UTC
 
 ### Book

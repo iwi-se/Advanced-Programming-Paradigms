@@ -1,4 +1,4 @@
-// Nodiscard.cpp by Ulrich Eisenecker, February 27, 2023
+// Nodiscard.cpp by Ulrich Eisenecker, May 5, 2026
 
 #include <cstdlib>
 #include <cstdint> // Because of maxint_t
@@ -19,7 +19,7 @@ class [[nodiscard]] RationalNumber
       {
          return m_denominator;
       }
-      RationalNumber copy()
+      RationalNumber copy() const
       {
          return *this;
 
@@ -35,7 +35,7 @@ int main()
    rn.numerator();
    rn.denominator();
    rn.copy(); // Warning: return value not used
-   RationalNumber { };     // WTemporary not used
+   RationalNumber { };     // Temporary not used
    RationalNumber { 1 };   // Temporary not used
    RationalNumber { 1,3 }; // Temporary not used
 }

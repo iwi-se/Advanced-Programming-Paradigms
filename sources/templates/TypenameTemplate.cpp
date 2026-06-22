@@ -1,4 +1,4 @@
-// TypenameTemplate.cpp by Ulrich Eisenecker, July 13, 2022
+// TypenameTemplate.cpp by Ulrich Eisenecker, June 17, 2026
 
 #include <iostream>
 using namespace std;
@@ -12,9 +12,9 @@ class ClassTemplate
          cout << T::A << endl;
          typename T::B someValue { 99 };
          cout << someValue << endl;
-         typename T:: template C<1> someClass;
+         typename T::template C<1> someClass;
          cout << T::template C<0>::D << endl;
-         typename T:: template C<-1>::E anotherValue { 22.0 / 7.0 };
+         typename T::template C<-1>::E anotherValue { 22.0 / 7.0 };
          cout << anotherValue << endl;
       }
 };
@@ -47,8 +47,11 @@ class AnotherClass
       };
 };
 
+//Force full instantiations fo template:
+//
+template class ClassTemplate<SomeClass>;
+template class ClassTemplate<AnotherClass>;
+
 int main()
 {
-   ClassTemplate<SomeClass> ct1;
-   ClassTemplate<AnotherClass> ct2;
 }

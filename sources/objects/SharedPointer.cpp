@@ -25,7 +25,7 @@ int main()
 {
    cout << "Two shared pointers that share the same object." << endl;
    auto sp1 { make_shared<string>("ok?") };
-   info("sp1 = make_shared<string>(\"ok?i\"s)",sp1);
+   info("sp1 = make_shared<string>(\"ok?\"s)",sp1);
    auto sp2 { sp1 };
    info("sp2 { sp1 };                      ",sp2);
    *sp1 = "OK!";

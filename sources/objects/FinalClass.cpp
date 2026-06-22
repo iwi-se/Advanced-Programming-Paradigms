@@ -1,4 +1,4 @@
-// FinalAndClass.cpp by Ulrich Eisenecker, February 20, 2023
+// FinalClass.cpp by Ulrich Eisenecker, February 20, 2023
 // Warning: This program will not compile on purpose!
 
 #include <type_traits>
@@ -13,7 +13,7 @@ class DontUseAsBaseClass
    // this should not be done.
    
    // Decomment the next line for 
-   // providing a virtual destructor.
+   // providing a virtual destructor:
    // public: virtual ~DontUseAsBaseClass() {};
 };
 

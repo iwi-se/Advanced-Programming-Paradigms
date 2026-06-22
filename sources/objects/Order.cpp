@@ -37,5 +37,5 @@ class Derived: public Class
 
 int main()
 {
-   Derived d("This is d");
+   Derived d { "This is d" };
 }

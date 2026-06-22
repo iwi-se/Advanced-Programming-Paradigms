@@ -70,7 +70,7 @@ TEST_CASE("BIND3")
    using namespace std::placeholders;
    auto coneVolume2 { std::bind(conicalSegmentVolume,_1,_2,_2) };
    auto equilateralConeVolume { std::bind(coneVolume2,_1,
-                                std::bind([](double n) 
+                                std::bind([](double n)
                                           { return 2.0 * n; },_1)) };
    std::cout << equilateralConeVolume(6.0) << std::endl;
    REQUIRE_THAT(equilateralConeVolume(6.0),
@@ -81,7 +81,7 @@ TEST_CASE("BIND4")
 {
    using namespace std::placeholders;
    auto equilateralConeVolume { std::bind(coneVolume,_1,
-                                std::bind([](double n) 
+                                std::bind([](double n)
                                           { return 2.0 * n; },_1)) };
    std::cout << equilateralConeVolume(6.0) << std::endl;
    REQUIRE_THAT(equilateralConeVolume(6.0),

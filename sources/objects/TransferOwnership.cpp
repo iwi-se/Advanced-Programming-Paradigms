@@ -1,4 +1,4 @@
-// TransferOwnership.cpp by Ulrich Eisenecker, May 22, 2024
+// TransferOwnership.cpp by Ulrich Eisenecker, June 3, 2026
 
 #include <iostream>
 #include <memory>
@@ -22,8 +22,8 @@ class Object
 
 void transferOwnership(unique_ptr<Object>&& o)
 {
-   unique_ptr<Object> local { std::move(o) }; // <--  Some compilers
-   // may issue a warning if a call to move() is not fully qualified.
+   unique_ptr<Object> local { std::move(o) }; // <-- Some compilers
+   // issue a warning if a call to move() is not fully qualified.
 }
 
 int main()
@@ -31,7 +31,7 @@ int main()
    transferOwnership(unique_ptr<Object> { new Object });
    unique_ptr<Object> o { new Object };
    cout << boolalpha << (o.get() == nullptr) << endl;
-   transferOwnership(std::move(o));; // <--  Some compilers
-   // may issue a warning if a call to move() is not fully qualified.
+   transferOwnership(std::move(o)); // <--Some compilers
+   // issue a warning if a call to move() is not fully qualified.
    cout << boolalpha << (o.get() == nullptr) << endl;
 }

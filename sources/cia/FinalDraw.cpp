@@ -9,7 +9,7 @@
 #include <vector>
 
 #include "to_string.hpp"
-#include "../objects/urn.hpp"
+#include "urn.hpp"
 
 using namespace std;
 using namespace urn;

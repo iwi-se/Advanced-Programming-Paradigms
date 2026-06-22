@@ -1,10 +1,10 @@
-// Sorting.cpp by Ulrich Eisenecker, February 17, 2023
+// Sorting.cpp by Ulrich Eisenecker, April 27, 2026
 
+#include <algorithm> // Because of sort<>()
+#include <cstdlib> // Because of atoll()
+#include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm> // Because of sort<>
-#include <iostream>
-#include <cstdlib> // Because of atoll()
 
 using namespace std;
 
